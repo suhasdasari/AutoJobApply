@@ -1,0 +1,33 @@
+# LinkedIn Credentials and Search Parameters
+# Replace these values with your actual information
+
+# LinkedIn Login Credentials
+linkedin.email=your.email@example.com
+linkedin.password=your_password_here
+
+# Job Search Parameters
+linkedin.job.role=Software Engineer
+linkedin.job.location=Your City, State, Country
+
+# Job Filter Options (leave empty to skip)
+# Sort by options: day, week, month (posting date)
+linkedin.filter.sort_by=week
+
+# Job type options: temporary, contract, volunteer, full_time, part_time
+linkedin.filter.job_type=full_time
+
+# Experience level options: internship, entry_level, associate, mid_senior_level, director
+linkedin.filter.exp_level=mid_senior_level
+
+# Easy apply only: true or false
+linkedin.filter.easy_apply=true
+
+# Remote option: remote, onsite, hybrid (leave empty for no filter)
+linkedin.filter.remote=remote
+
+# Configuration Options
+linkedin.wait.manual.login=true
+linkedin.wait.manual.login.seconds=30
+
+# Browser Settings
+linkedin.browser.headless=false
