@@ -4,10 +4,14 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import io.github.bonigarcia.wdm.WebDriverManager;
+import com.example.easy.JobApplier.ContactInfo;
+
+import java.util.Scanner;
 
 /**
  * Main workflow class to orchestrate the LinkedIn automation
- * This combines the LinkedInOpener for login and LinkedInJobsNavigator for job browsing
+ * This combines the LinkedInOpener for login, LinkedInJobsNavigator for job browsing,
+ * and contact info handling for Easy Apply applications
  */
 public class LinkedInWorkflow {
     
@@ -16,8 +20,10 @@ public class LinkedInWorkflow {
      * @param args Command line arguments (not used)
      */
     public static void main(String[] args) {
-        // Declare the driver outside the try block so it's accessible in the finally block
+        // Declare the driver and contactInfo outside the try block so they're accessible in the finally block
         WebDriver driver = null;
+        ContactInfo contactInfo = null;
+        Scanner scanner = null;
         
         try {
             // Setup WebDriverManager for Chrome
@@ -52,23 +58,68 @@ public class LinkedInWorkflow {
                 // Navigate to jobs
                 LinkedInJobsNavigator.navigateToJobs(driver);
                 
-                System.out.println("LinkedIn workflow completed successfully!");
+                // Step 3: Click on the first job and start Easy Apply process
+                System.out.println("Step 3: Starting Easy Apply process...");
+                
+                // Create contact info handler
+                contactInfo = new ContactInfo(driver);
+                
+                // Click on first job and start Easy Apply
+                boolean applyStarted = contactInfo.clickFirstJobAndApply();
+                
+                if (applyStarted) {
+                    System.out.println("Successfully started Easy Apply process.");
+                    
+                    // Handle contact info form
+                    boolean contactInfoHandled = contactInfo.handleContactInfo();
+                    
+                    if (contactInfoHandled) {
+                        System.out.println("Contact info section completed successfully.");
+                        System.out.println("The application will now wait for you to review and complete the remaining steps.");
+                        
+                        // Keep the browser open to allow user to complete the application
+                        System.out.println("Press Enter to close the browser when done...");
+                        scanner = new Scanner(System.in);
+                        scanner.nextLine();
+                    } else {
+                        System.out.println("Failed to handle contact info section. The form may be different than expected.");
+                        System.out.println("Check the screenshots saved in the project directory for debugging.");
+                    }
+                } else {
+                    System.out.println("Failed to start Easy Apply process. The Easy Apply button may not have been found.");
+                    System.out.println("This job may not support Easy Apply or the button was not detected.");
+                    System.out.println("Check the screenshots saved in the project directory for debugging.");
+                }
             } else {
-                System.out.println("Login failed. Cannot proceed to Jobs navigation.");
+                System.out.println("LinkedIn login failed. Cannot proceed with job application.");
+                System.out.println("Please check your credentials in the properties file and ensure they are correct.");
             }
             
-            // Keep the browser open at the end
-            System.out.println("Workflow complete. Browser will remain open for 30 seconds.");
-            Thread.sleep(30000);
-            
         } catch (Exception e) {
-            System.out.println("An error occurred during the workflow: " + e.getMessage());
+            System.out.println("Error during workflow execution: " + e.getMessage());
             e.printStackTrace();
         } finally {
-            // Always close the browser in the finally block
-            if (driver != null) {
-                driver.quit();
-                System.out.println("Browser closed.");
+            // Clean up resources
+            try {
+                // Close the scanner if it was opened
+                if (scanner != null) {
+                    scanner.close();
+                    System.out.println("Scanner closed.");
+                }
+                
+                // Clean up the ContactInfo resources
+                if (contactInfo != null) {
+                    contactInfo.cleanup();
+                    System.out.println("ContactInfo resources cleaned up.");
+                }
+                
+                // Quit the driver
+                if (driver != null) {
+                    driver.quit();
+                    System.out.println("Browser closed.");
+                }
+            } catch (Exception e) {
+                System.out.println("Error during cleanup: " + e.getMessage());
             }
         }
     }
